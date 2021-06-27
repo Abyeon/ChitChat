@@ -1,0 +1,2 @@
+# ChitChat
+Simple chatting client
