@@ -40,6 +40,20 @@
             messages.appendChild(item);
             window.scrollTo(0, document.body.scrollHeight);
         });
+
+        socket.on('user disconnect', function() {
+            var item = document.createElement('li');
+            item.textContent = "User disconnected";
+            messages.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+
+        socket.on('user connect', function() {
+            var item = document.createElement('li');
+            item.textContent = "User connected";
+            messages.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+        })
     </script>
   </body>
 </html>

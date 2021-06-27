@@ -10,6 +10,7 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', (socket) => {
+    io.emit('user connect');
     console.log('A user connected');
 
     socket.on('chat message', (msg) => {
@@ -18,6 +19,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('disconnect', () => {
+        io.emit('user disconnect');
         console.log('A user disconnected.');
     });
 });
