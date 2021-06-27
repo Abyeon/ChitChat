@@ -1,2 +1,2 @@
-# Claptrap
+# Styrup
 Simple chatting client
