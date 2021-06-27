@@ -1,2 +1,2 @@
-# ChitChat
+# Claptrap
 Simple chatting client
