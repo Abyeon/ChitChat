@@ -14,13 +14,19 @@ app.get('/client.js', (req, res) => {
   res.sendFile(__dirname + '/client/client.js');
 });
 
+var messages = [];
+
 io.on('connection', (socket) => {
-    io.emit('user connect');
-    console.log('A user connected');
+    socket.on('log in', (name) => {
+      io.to(socket.id).emit('MESSAGE_BLOCK', messages);
+      io.emit('user connect', name);
+      console.log(`${name} has connected.`)
+    });
 
     socket.on('chat message', (msg) => {
         io.emit('chat message', msg);
-        console.log(`${msg.name}: ${msg.content}`);
+        messages.push(msg);
+        console.log(`${socket.id} ${msg.name}: ${msg.content}`);
     })
 
     socket.on('disconnect', () => {
