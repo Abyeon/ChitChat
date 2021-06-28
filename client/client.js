@@ -61,13 +61,13 @@ socket.on('RELOAD', () => { // In case the server restarts, things will break
     location.reload();
 })
 
-socket.on('CHAT_MESSAGE', function(msg) {
+socket.on('CHAT_MESSAGE', (msg) => {
     addMessage(msg);
     messageCache.push(msg);
 });
 
-socket.on('USER_DISCONNECT', function() {
-    addInfoMessage('User disconnected.');
+socket.on('USER_DISCONNECT', (username) => {
+    addInfoMessage(`${username} has disconnected.`);
 });
 
 socket.on('USER_CONNECT', (name) => {

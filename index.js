@@ -46,11 +46,12 @@ io.on('connection', (socket) => {
 
   // On user disconnect
   socket.on('disconnect', () => {
+    let user = users.find(user => user.id == socket.id)
+    io.emit('USER_DISCONNECT', user.username);
+
     // Remove socket from the user array
     let index = users.map(user => user.id).indexOf(socket.id);
     if (index > -1) users.splice(index, 1);
-
-    io.emit('USER_DISCONNECT');
     console.log('A user disconnected.');
   });
 });
