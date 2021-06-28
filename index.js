@@ -16,10 +16,11 @@ app.get('/client.js', (req, res) => {
 });
 
 var messages = []; // Logged messages { name: senders-name, content: message-content }
-var users = []; // Active users       { id: their-socket-id, name: their-username }
+var users = []; //Active users        { id: their-socket-id, name: their-username }
 
 io.on('connection', (socket) => {
   // User "logs in", though its basically just setting their name for now
+  // TODO: Stop user from having a duplicate name
   socket.on('USER_LOG_IN', (name) => {
     io.to(socket.id).emit('MESSAGE_BLOCK', messages);
     users.push({id: socket.id, username: name});
@@ -45,8 +46,9 @@ io.on('connection', (socket) => {
   // On user disconnect
   socket.on('disconnect', () => {
     // Remove socket from the user array
-    let index = users.indexOf(socket.io);
+    let index = users.map(user => user.id).indexOf(socket.id);
     if (index > -1) users.splice(index, 1);
+    console.log(users);
 
     io.emit('USER_DISCONNECT');
     console.log('A user disconnected.');
