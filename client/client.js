@@ -3,7 +3,7 @@ const form = document.getElementById('form');
 const input = document.getElementById('input');
 
 const username = window.prompt("Please enter a name");
-socket.emit('log in', username);
+socket.emit('USER_LOG_IN', username);
 
 function addMessage(msg) {
     var item = document.createElement('li');
@@ -15,7 +15,7 @@ function addMessage(msg) {
 form.addEventListener('submit', function(e) {
     e.preventDefault();
     if (input.value) {
-        socket.emit('chat message', {name: username, content: input.value});
+        socket.emit('CHAT_MESSAGE', input.value);
         input.value = '';
     }
 });
@@ -26,14 +26,18 @@ socket.on('MESSAGE_BLOCK', (messages) => {
     });
 });
 
-socket.on('chat message', function(msg) {
+socket.on('RELOAD', () => { // In case the server restarts, things will break
+    location.reload();
+})
+
+socket.on('CHAT_MESSAGE', function(msg) {
     addMessage(`${msg.name}: ${msg.content}`);
 });
 
-socket.on('user disconnect', function() {
+socket.on('USER_DISCONNECT', function() {
     addMessage('User disconnected.');
 });
 
-socket.on('user connect', (name) => {
+socket.on('USER_CONNECT', (name) => {
     addMessage(`${name} has connected.`);
 })

@@ -4,6 +4,7 @@ const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
+const config = require('./config.json')
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/client/index.html');
@@ -14,25 +15,42 @@ app.get('/client.js', (req, res) => {
   res.sendFile(__dirname + '/client/client.js');
 });
 
-var messages = [];
+var messages = []; // Logged messages { name: senders-name, content: message-content }
+var users = []; // Active users       { id: their-socket-id, name: their-username }
 
 io.on('connection', (socket) => {
-    socket.on('log in', (name) => {
-      io.to(socket.id).emit('MESSAGE_BLOCK', messages);
-      io.emit('user connect', name);
-      console.log(`${name} has connected.`)
-    });
+  // User "logs in", though its basically just setting their name for now
+  socket.on('USER_LOG_IN', (name) => {
+    io.to(socket.id).emit('MESSAGE_BLOCK', messages);
+    users.push({id: socket.id, username: name});
+    io.emit('USER_CONNECT', name);
+    console.log(`${name} has connected.`);
+  });
 
-    socket.on('chat message', (msg) => {
-        io.emit('chat message', msg);
-        messages.push(msg);
-        console.log(`${socket.id} ${msg.name}: ${msg.content}`);
-    })
+  socket.on('CHAT_MESSAGE', (msg) => {
+    let user = users.find(user => user.id == socket.id)
 
-    socket.on('disconnect', () => {
-        io.emit('user disconnect');
-        console.log('A user disconnected.');
-    });
+    // If the user tries sending a message after the server restarts, things break. So just reload their page for now.
+    if (!user) {
+      io.to(socket.id).emit('RELOAD');
+    }
+
+    let message = {name: user.username, content: msg.slice(0, config.charLimit)};
+
+    io.emit('CHAT_MESSAGE', message);
+    messages.push(message);
+    console.log(`${socket.id} ${message.name}: ${message.content}`);
+  })
+
+  // On user disconnect
+  socket.on('disconnect', () => {
+    // Remove socket from the user array
+    let index = users.indexOf(socket.io);
+    if (index > -1) users.splice(index, 1);
+
+    io.emit('USER_DISCONNECT');
+    console.log('A user disconnected.');
+  });
 });
 
 server.listen(3000, () => {
