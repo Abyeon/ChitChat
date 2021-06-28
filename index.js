@@ -37,7 +37,7 @@ io.on('connection', (socket) => {
       return;
     }
 
-    let message = {name: user.username, content: msg.slice(0, config.charLimit), date: new Date().toLocaleString()};
+    let message = {name: user.username, content: msg.slice(0, config.charLimit), date: Date.now()};
 
     io.emit('CHAT_MESSAGE', message);
     messages.push(message);

@@ -18,7 +18,10 @@ function addMessage(msg) {
         header.textContent = msg.name;
 
         var timestamp = document.createElement('span');
-        timestamp.textContent = " - " + msg.date;
+
+        let date = new Date(msg.date);
+
+        timestamp.textContent = " - " + date.toLocaleString();
 
         header.appendChild(timestamp);
 
