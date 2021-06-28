@@ -12,7 +12,12 @@
 
       #messages { list-style-type: none; margin: 0; padding: 0; width: 100%; word-wrap: break-word;}
       #messages > li { padding: 0.5rem 1rem;}
-      #messages > li:nth-child(odd) { background: #efefef; }
+      /*#messages > li:nth-child(odd) { background: #efefef; }*/
+      #messages > li > h4 { margin: 0;}
+      #messages > li > h4 > span { font-weight: lighter;}
+      #messages > li > span { white-space: pre-line; margin: 0; padding: 0; display: block;}
+
+      .infomessage { background: #efefef; }
     </style>
   </head>
   <body>

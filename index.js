@@ -37,11 +37,11 @@ io.on('connection', (socket) => {
       return;
     }
 
-    let message = {name: user.username, content: msg.slice(0, config.charLimit)};
+    let message = {name: user.username, content: msg.slice(0, config.charLimit), date: new Date().toLocaleString()};
 
     io.emit('CHAT_MESSAGE', message);
     messages.push(message);
-    console.log(`${socket.id} ${message.name}: ${message.content}`);
+    console.log(`${message.date} ${socket.id} ${message.name}: ${message.content}`);
   })
 
   // On user disconnect
