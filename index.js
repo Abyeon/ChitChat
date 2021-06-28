@@ -49,7 +49,6 @@ io.on('connection', (socket) => {
     // Remove socket from the user array
     let index = users.map(user => user.id).indexOf(socket.id);
     if (index > -1) users.splice(index, 1);
-    console.log(users);
 
     io.emit('USER_DISCONNECT');
     console.log('A user disconnected.');
