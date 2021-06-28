@@ -10,15 +10,15 @@
       #input:focus { outline: none; }
       #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
 
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages > li { padding: 0.5rem 1rem; }
+      #messages { list-style-type: none; margin: 0; padding: 0; width: 100%; word-wrap: break-word;}
+      #messages > li { padding: 0.5rem 1rem;}
       #messages > li:nth-child(odd) { background: #efefef; }
     </style>
   </head>
   <body>
     <ul id="messages"></ul>
     <form id="form" action="">
-      <input id="input" autocomplete="off" /><button>Send</button>
+      <input id="input" autocomplete="off" maxlength="500"/><button>Send</button>
     </form>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/client.js"></script>
