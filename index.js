@@ -34,6 +34,7 @@ io.on('connection', (socket) => {
     // If the user tries sending a message after the server restarts, things break. So just reload their page for now.
     if (!user) {
       io.to(socket.id).emit('RELOAD');
+      return;
     }
 
     let message = {name: user.username, content: msg.slice(0, config.charLimit)};
