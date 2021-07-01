@@ -2,11 +2,13 @@ const socket = io();
 const form = document.getElementById('form');
 const input = document.getElementById('input');
 
-const username = window.prompt("Please enter a name");
+/* Send Server A Request To Log In As Name */
+let username = window.prompt("Please enter a name");
 socket.emit('USER_LOG_IN', username);
 
 let messageCache = [];
 
+/* Format and add a new message to the document */
 function addMessage(msg) {
     var item = document.createElement('li');
 
@@ -37,6 +39,7 @@ function addMessage(msg) {
     window.scrollTo(0, document.body.scrollHeight);
 }
 
+/* Format and add a server message to the document */
 function addInfoMessage(msg) {
     var item = document.createElement('li');
     item.textContent = msg;
@@ -45,6 +48,7 @@ function addInfoMessage(msg) {
     window.scrollTo(0, document.body.scrollHeight);
 }
 
+/* We (client) sends message */
 form.addEventListener('submit', function(e) {
     e.preventDefault();
     if (input.value) {
@@ -53,6 +57,13 @@ form.addEventListener('submit', function(e) {
     }
 });
 
+/* Sent name was taken, retry */
+socket.on('BAD_NAME', () => {
+    // TODO: Show warning before reloading
+    location.reload();
+});
+
+/* Recieved previous messages */
 socket.on('MESSAGE_BLOCK', (messages) => {
     messages.forEach(msg => {
         addMessage(msg);
@@ -60,19 +71,18 @@ socket.on('MESSAGE_BLOCK', (messages) => {
     });
 });
 
+/* Server asked client to refresh page */
 socket.on('RELOAD', () => { // In case the server restarts, things will break
     location.reload();
 })
 
+/* New message recieved */
 socket.on('CHAT_MESSAGE', (msg) => {
     addMessage(msg);
     messageCache.push(msg);
 });
 
-socket.on('USER_DISCONNECT', (username) => {
-    addInfoMessage(`${username} has disconnected.`);
+/* Server message recieved */
+socket.on('INFO_MESSAGE', (msg) => {
+    addInfoMessage(msg);
 });
-
-socket.on('USER_CONNECT', (name) => {
-    addInfoMessage(`${name} has connected.`);
-})

@@ -1,3 +1,4 @@
 {
-    "charLimit":2000
+    "charLimit":2000,
+    "spamDelay":500
 }

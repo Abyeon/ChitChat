@@ -1,11 +1,17 @@
+/* NPM */
 const express = require('express');
-const app = express();
 const http = require('http');
-const server = http.createServer(app);
 const { Server } = require("socket.io");
+
+/* Server Stuff */
+const app = express();
+const server = http.createServer(app);
 const io = new Server(server);
+
+/* Required Files */
 const config = require('./config.json')
 
+/* Content To Send New Connections */
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/client/index.html');
 });
@@ -16,18 +22,31 @@ app.get('/client.js', (req, res) => {
 });
 
 var messages = []; // Logged messages { name: senders-name, content: message-content }
-var users = []; //Active users        { id: their-socket-id, name: their-username }
+var users = [];    // Active users    { id: their-socket-id, name: their-username }
 
+/* New Socket Connection */
 io.on('connection', (socket) => {
   // User "logs in", though its basically just setting their name for now
   // TODO: Stop user from having a duplicate name
+
+  let nextMessageTime = new Date().getTime() + config.spamDelay;
+  let warned = false;
+  
+  /* New User Logged In */
   socket.on('USER_LOG_IN', (name) => {
+    if (name == null) return io.to(socket.id).emit('BAD_NAME');
+
+    users.forEach(user => {
+      if (user.username.toLowerCase() == name.toLowerCase()) return io.to(socket.id).emit('BAD_NAME');
+    });
+
     io.to(socket.id).emit('MESSAGE_BLOCK', messages);
     users.push({id: socket.id, username: name});
-    io.emit('USER_CONNECT', name);
+    io.emit('INFO_MESSAGE', `${name} has connected.`);
     console.log(`${name} has connected.`);
   });
 
+  /* Incoming Chat Message */
   socket.on('CHAT_MESSAGE', (msg) => {
     let user = users.find(user => user.id == socket.id)
 
@@ -37,21 +56,40 @@ io.on('connection', (socket) => {
       return;
     }
 
+    /* Spam Prevention */
+    let now = new Date().getTime();
+    let distance = nextMessageTime - now;
+
+    if (distance > 0) {
+      if (!warned) io.to(socket.id).emit('INFO_MESSAGE', `Please wait another ${(distance / 1000).toFixed(1)} second(s) to send another message.`);
+      warned = true;
+      return;
+    } else {
+      warned = false;
+    }
+
+    nextMessageTime = now + config.spamDelay;
+
+    /* Send Message */
     let message = {name: user.username, content: msg.slice(0, config.charLimit), date: Date.now()};
 
     io.emit('CHAT_MESSAGE', message);
     messages.push(message);
-    console.log(`${message.date} ${socket.id} ${message.name}: ${message.content}`);
+    console.log(`${new Date().toLocaleString()} ${socket.id} ${message.name}: ${message.content}`);
   })
 
-  // On user disconnect
+  /* User Disconnect */
   socket.on('disconnect', () => {
     let user = users.find(user => user.id == socket.id)
-    if (user) io.emit('USER_DISCONNECT', user.username);
+    if (user) io.emit('INFO_MESSAGE', `${user.username} has disconnected.`);
 
     // Remove socket from the user array
     let index = users.map(user => user.id).indexOf(socket.id);
-    if (index > -1) users.splice(index, 1);
+    if (index > -1) {
+      users.splice(index, 1);
+    } else {
+      console.log(`${user} not found.`);
+    }
     console.log('A user disconnected.');
   });
 });
