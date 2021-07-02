@@ -107,6 +107,7 @@ io.on('connection', (socket) => {
         } else {
             console.log(`${user} not found.`);
         }
+        
         console.log('A user disconnected.');
     });
 });

@@ -142,9 +142,9 @@ function updateTypingUsers() {
         });
     
         if (typingUsers.length > 1) {
-            temp += " are typing.";
+            temp += " are typing...";
         } else {
-            temp += " is typing.";
+            temp += " is typing...";
         }
     }
 
