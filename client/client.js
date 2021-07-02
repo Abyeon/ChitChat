@@ -1,6 +1,7 @@
 const socket = io();
 const form = document.getElementById('form');
 const input = document.getElementById('input');
+const typingBubble = document.getElementById('user-typing-bubble');
 
 /* Send Server A Request To Log In As Name */
 let username = window.prompt("Please enter a name");
@@ -49,11 +50,24 @@ function addInfoMessage(msg) {
 }
 
 /* We (client) sends message */
-form.addEventListener('submit', function(e) {
+form.addEventListener('submit', (e) => {
     e.preventDefault();
     if (input.value) {
         socket.emit('CHAT_MESSAGE', input.value);
         input.value = '';
+    }
+});
+
+/* On client typing */
+let typing = false;
+
+input.addEventListener('keypress', (e) => {
+    // Avoid sending too many typing events
+    if (!typing) {
+        typing = true;
+        socket.emit('TYPING');
+        console.log(e.code);
+        setTimeout(() => { typing = false; }, 5000);
     }
 });
 
@@ -86,3 +100,53 @@ socket.on('CHAT_MESSAGE', (msg) => {
 socket.on('INFO_MESSAGE', (msg) => {
     addInfoMessage(msg);
 });
+
+let typingUsers = [];
+
+/* On other client typing */
+socket.on('USER_TYPING', (name) => {
+    if (name.toLowerCase() != username.toLowerCase()) {
+        if (typingUsers.includes(name)) return;
+
+        typingUsers.push(name);
+
+        // Remove the user after 5 seconds.
+        setTimeout((name) => {
+            let index = typingUsers.indexOf(name);
+            typingUsers.splice(index, 1);
+            updateTypingUsers();
+        }, 5000);
+
+        updateTypingUsers();
+    }
+});
+
+function updateTypingUsers() {
+    console.log(typingUsers);
+
+    let temp = "";
+
+    if (typingUsers.length > 0) {
+        typingUsers.forEach((user, i) => {
+            if (typingUsers.length > 1 && typingUsers.length - 1 == i) {
+                temp += `and ${user}`;
+            } else {
+                temp += user;
+            }
+    
+            if (typingUsers.length > 2 && typingUsers.length - 1 > i) {
+                temp += ", ";
+            } else if (typingUsers.length == 2 && typingUsers.length - 1 > i) {
+                temp += " ";
+            }
+        });
+    
+        if (typingUsers.length > 1) {
+            temp += " are typing.";
+        } else {
+            temp += " is typing.";
+        }
+    }
+
+    typingBubble.textContent = temp;
+}
